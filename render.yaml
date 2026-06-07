@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: sehemistan
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sehemistan-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 3001
+
+databases:
+  - name: sehemistan-db
+    databaseName: sehemistan
+    user: sehemistan
+    plan: basic-256mb

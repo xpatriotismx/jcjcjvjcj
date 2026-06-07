@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PLAYER
+  MODERATOR
+  ADMIN
+}
+
+enum ShelterType {
+  STANDARD
+  FORTIFIED
+  COMMAND
+}
+
+enum ShelterStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum Currency {
+  MONEY
+  GOLD
+}
+
+enum BattleStatus {
+  WAITING
+  ACTIVE
+  FINISHED
+}
+
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique @db.VarChar(32)
+  email        String    @unique @db.VarChar(255)
+  passwordHash String
+  role         Role      @default(PLAYER)
+  money        BigInt    @default(5000000000)
+  gold         BigInt    @default(500)
+  level        Int       @default(1)
+  experience   Int       @default(0)
+  power        Int       @default(100)
+  health       Int       @default(100)
+  isVip        Boolean   @default(false)
+  vipExpiresAt DateTime?
+  lastSeenAt   DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  shelters       Shelter[]
+  chatMessages   ChatMessage[]
+  battleEvents   BattleEvent[]
+  adminActions   AdminAudit[]   @relation("AdminActor")
+  vipGrants      AdminAudit[]   @relation("AdminTarget")
+
+  @@index([isVip, vipExpiresAt])
+}
+
+model Shelter {
+  id            String        @id @default(uuid())
+  playerId      String
+  player        User          @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  type          ShelterType   @default(STANDARD)
+  level         Int           @default(1)
+  startsAt      DateTime
+  endsAt        DateTime
+  durationHours Int
+  currency      Currency
+  cost          BigInt
+  status        ShelterStatus @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([playerId, status, endsAt])
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid())
+  roomId    String   @db.VarChar(64)
+  body      String   @db.VarChar(500)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([roomId, createdAt])
+}
+
+model Battle {
+  id             String       @id @default(uuid())
+  roomId         String       @unique @db.VarChar(64)
+  status         BattleStatus @default(WAITING)
+  attackerName   String       @db.VarChar(64)
+  defenderName   String       @db.VarChar(64)
+  attackerScore  Int          @default(0)
+  defenderScore  Int          @default(0)
+  revision       Int          @default(0)
+  state          Json         @default("{}")
+  startedAt      DateTime?
+  endsAt         DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  events         BattleEvent[]
+
+  @@index([status, updatedAt])
+}
+
+model BattleEvent {
+  id        String   @id @default(uuid())
+  battleId  String
+  battle    Battle   @relation(fields: [battleId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  kind      String   @db.VarChar(40)
+  payload   Json
+  revision  Int
+  createdAt DateTime @default(now())
+
+  @@unique([battleId, revision])
+  @@index([battleId, createdAt])
+}
+
+model AdminAudit {
+  id         String   @id @default(uuid())
+  actorId    String
+  actor      User     @relation("AdminActor", fields: [actorId], references: [id], onDelete: Restrict)
+  targetId   String?
+  target     User?    @relation("AdminTarget", fields: [targetId], references: [id], onDelete: SetNull)
+  action     String   @db.VarChar(80)
+  metadata   Json
+  ipAddress  String?  @db.VarChar(64)
+  createdAt  DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([targetId, createdAt])
+}

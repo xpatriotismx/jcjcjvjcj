@@ -1,0 +1,27 @@
+{
+  "name": "sehemistan",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run build -w @sehemistan/contracts && concurrently -n api,web -c red,cyan \"npm run dev -w @sehemistan/api\" \"npm run dev -w @sehemistan/web\"",
+    "build": "npm run build -w @sehemistan/contracts && npm run build -w @sehemistan/api && npm run build -w @sehemistan/web",
+    "typecheck": "npm run build -w @sehemistan/contracts && npm run typecheck -w @sehemistan/api && npm run typecheck -w @sehemistan/web",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "db:generate": "npm run db:generate -w @sehemistan/api",
+    "db:migrate": "npm run db:migrate -w @sehemistan/api",
+    "db:seed": "npm run db:seed -w @sehemistan/api",
+    "start": "npm run start -w @sehemistan/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
