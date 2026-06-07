@@ -26,10 +26,13 @@ export async function buildApp() {
     connectionTimeout: 10_000
   });
 
+  // CORS ayarını tüm dış isteklere ve metotlara izin verecek şekilde güncelledik
   await app.register(cors, {
-    origin: env.CORS_ORIGIN.split(",").map((origin) => origin.trim()),
-    credentials: true
+    origin: true,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
   });
+  
   await app.register(rateLimit, { max: 180, timeWindow: "1 minute" });
   await app.register(prismaPlugin);
   await app.register(authPlugin);
