@@ -1,6 +1,7 @@
 import type { PlayerSummary } from "@sehemistan/contracts";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "";
+// API URL tanımını doğrudan canlı Render sunucu adresinizle güncelledik
+const API_URL = "https://sehemistan-api.onrender.com";
 
 export interface ApiError {
   message: string;

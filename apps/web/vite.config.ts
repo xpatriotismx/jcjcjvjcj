@@ -6,9 +6,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      "/api": "http://localhost:3001",
+      "/api": "https://sehemistan-api.onrender.com",
       "/ws": {
-        target: "ws://localhost:3001",
+        target: "https://sehemistan-api.onrender.com",
         ws: true
       }
     }
