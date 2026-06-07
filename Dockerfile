@@ -20,4 +20,6 @@ COPY --from=build /app/apps/web/dist ./apps/web/dist
 COPY --from=build /app/packages/contracts/package.json ./packages/contracts/package.json
 COPY --from=build /app/packages/contracts/dist ./packages/contracts/dist
 EXPOSE 3001
-CMD ["sh", "-c", "npx prisma migrate deploy --schema apps/api/prisma/schema.prisma && node apps/api/dist/server.js"]
+
+# Hata veren 'npx prisma migrate deploy' komutunu kaldırarak doğrudan sunucuyu başlatıyoruz
+CMD ["node", "apps/api/dist/server.js"]
